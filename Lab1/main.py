@@ -4,7 +4,7 @@ import re
 #Lab 1: Viết chương trình quản lý danh bạ (thêm, sửa, xóa, lưu file)
 print("day la bai hoc dau tien")
 
-#khai bao kieu danh sach
+#khai bao kieu danh sach luu thong tin danh ba
 contract = []
 
 #khai bao mot function
@@ -28,8 +28,9 @@ def check_function(name):
             edit_contact() 
         case 5 :
             print("Ban da chon, tinh nang Xoa danh ba")
+            delete_contract()
         case 6 :
-            print("Ban da chon, tinh nang Xuat danh ba")
+            print("Ban da chon, tinh nang Xuat danh ba")    
         case 7 :
             print("Ban da chon, Thoat")
 
@@ -88,43 +89,64 @@ def addNewContract() :
 
 def edit_contact() :
     data_find = findContract()
-    for item in data_find:
-        print(f"STT:{item.get('index')}. Ten:{item.get('ten')}, SDT:{item.get('phone')}")
-    index_edit = input("\nChon dong dieu chinh")
-    while len(index_edit) > len(data_find) :
-        index_edit = input("\nDong dieu chinh khong duoc lon hon so dong tim duoc")
-        continue
-    print(f"\nBan co muon dieu chinh lien he tai dong {index_edit} Khong?")
-    confirm_action = input("\n1.Co \n2.Khong")
-    if confirm_action =="2" :
-        showMenu()
-    else:
-        try:
-            selected_contact = contract[int(index_edit)-1]
-            print("\nNhap thong tin moi (de trong neu khong muon sua):")
-            new_name = input(f"Ten moi ({selected_contact.get('ten')}): ")
+    if len(data_find) > 0 :
+        for item in data_find:
+            print(f"STT:{item.get('index')}. Ten:{item.get('ten')}, SDT:{item.get('phone')}")
+        index_edit = input("Chon dong dieu chinh: ")
+        while len(index_edit) > len(data_find) :
+            index_edit = input("Dong dieu chinh khong duoc lon hon so dong tim duoc: ")
+            continue
+        print(f"Ban co muon dieu chinh lien he tai dong {index_edit} Khong?")
+        confirm_action = input("1.Co \n2.Khong \nBan chon: ")
+        if confirm_action =="2" :
+            showMenu()
+        else:
+            try:
+                selected_contact = contract[int(index_edit)-1]
+                print("\nNhap thong tin moi (de trong neu khong muon sua):")
+                new_name = input(f"Ten moi ({selected_contact.get('ten')}): ")
 
-            new_phone = input(f"SDT moi ({selected_contact.get('phone')}): ")
-            while len(find_by_phone(new_phone)) > 0 :
-                new_phone = input("So dien thoai da ton tai !!!!! \nVui long nhap so khac: ")
-                continue
+                new_phone = input(f"SDT moi ({selected_contact.get('phone')}): ")
 
-            new_email = input(f"Email moi ({selected_contact.get('email')}): ")
+                while len(find_by_phone(new_phone)) > 0 :
+                    new_phone = input("So dien thoai da ton tai !!!!! \nVui long nhap so khac: ")
+                    continue
+                new_email = input(f"Email moi ({selected_contact.get('email')}): ")
 
-            if new_name:
-                selected_contact['ten'] = new_name
-            if new_phone:
-                selected_contact['phone'] = new_phone
-            if new_email:
-                selected_contact['email'] = new_email
-            print("Cap nhat thong tin thanh cong!")
-        except  ValueError:
-            print("Vui long nhap so.")
+                if new_name:
+                    selected_contact['ten'] = new_name
+                if new_phone:
+                    selected_contact['phone'] = new_phone
+                if new_email:
+                    selected_contact['email'] = new_email
+                print("Cap nhat thong tin thanh cong ! Thong tin sau khi cap nhat la")
+                
+                showContactFind(contract)
+            except  ValueError:
+                print("Vui long nhap so.")
+    else :
+        print("Khong the thuc hien tinh nang dieu chinh")
 
-   
-
-
-
+def delete_contract() :
+    data_find = findContract()
+    if len(data_find) <= 0 :
+        print("Khong the thuc hien tinh nang xoa")
+    else :
+        index_edit = input("\nChon liem he muon xoa")
+        while len(index_edit) > len(data_find) :
+            index_edit = input("\nLien he muon xoa khong duoc lon hon so dong tim duoc")
+            continue
+        print(f"\nBan co muon xoa lien he tai dong {index_edit} Khong?")
+        confirm_action = input("\n1.Co \n2.Khong")
+        if confirm_action =="2" :
+            showMenu()
+        else:
+            try:
+                contract.pop( int(index_edit)-1)
+                print("Xoa thong tin danh ba thanh cong! Danh ba con lai.")
+                showContactFind(contract)
+            except  ValueError:
+                print("Vui long nhap so.")
 def find_by_phone(phone) :
     temp = []
     for i_contact in contract :
@@ -159,7 +181,12 @@ def filter_search() :
 
 
 def findContract():
+    if len(contract) <= 0 :
+        print("Khong co thong tin nao trong danh sach. Vui long them moi")
+        return []    
+        
     find_by_key, find_by_value = filter_search() 
+
     tempFind = []
     if find_by_key == "1" :           
         tempFind = find_by_name(find_by_value) 
@@ -198,22 +225,32 @@ def showMenu() :
 if __name__ == "__main__":
     print("________Running_______")
     showMenu() 
-    while True:
-        
-        luachontinhnang = input("Chon tinh nang tu 1->7: ")
+    while True:      
+        luachontinhnang = input("Chon tinh nang tu 1->7: ").strip()
         if(int(luachontinhnang) == 3) :
             soluong = input("Nhap so lan thuc hien")
         if(int(luachontinhnang) == 0) :
             showMenu()
         if int(luachontinhnang) == 1:
+            print("\n" + "="*30)
             check_function(int(luachontinhnang))
         elif int(luachontinhnang) == 2:
+            print("\n" + "="*30)
             check_function(int(luachontinhnang))   
         elif int(luachontinhnang) == 3:
+            print("\n" + "="*30)
             check_function(int(luachontinhnang))
         elif int(luachontinhnang) == 4:
+            print("\n" + "="*30)
+            check_function(int(luachontinhnang))
+        elif int(luachontinhnang) == 5:
+            print("\n" + "="*30)
+            check_function(int(luachontinhnang))
+        elif int(luachontinhnang) == 6:
+            print("\n" + "="*30)
             check_function(int(luachontinhnang))
         if int(luachontinhnang) == 7 :
+            print("\n" + "="*30)
             print("Cam on ban da su dung chuong trinh")
             break
         else :
