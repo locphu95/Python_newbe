@@ -1,40 +1,42 @@
 import re
-
-
+import pandas as pd
+import csv
+import json
 #Lab 1: Viết chương trình quản lý danh bạ (thêm, sửa, xóa, lưu file)
 print("day la bai hoc dau tien")
 
 #khai bao kieu danh sach luu thong tin danh ba
-contract = []
+Contacts = []
 
 #khai bao mot function
 def check_function(name):
     match int(name):
         case 1 :
             print("Ban da chon, tinh nang 1 Hien thi danh ba")
-            countContract(contract)
+            countContact(Contacts)
         case 2 :
             print("Ban da chon, tinh nang 2 Tim danh ba")
-            if len(contract) > 0 :      
-                showContactFind(findContract())
+            if len(Contacts) > 0 :      
+                showContactFind(findContact())
             else:
-                countContract(contract)
+                countContact(Contacts)
                 print("Khong the tim kiem")
         case 3 :
             print("Ban da chon, tinh nang Them kiem danh ba")
-            addNewContract() 
+            addNewContact() 
         case 4 :
             print("Ban da chon, tinh nang Dieu chinh danh ba")
             edit_contact() 
         case 5 :
             print("Ban da chon, tinh nang Xoa danh ba")
-            delete_contract()
+            delete_Contact()
         case 6 :
-            print("Ban da chon, tinh nang Xuat danh ba")    
+            print("Ban da chon, tinh nang Xuat danh ba")
+            export_Contact()  
         case 7 :
             print("Ban da chon, Thoat")
 
-def countContract(data):
+def countContact(data):
     print(f"So luong danh ba la {len(data)}")
     if len(data) > 0 :
         showContactFind(data)
@@ -61,7 +63,7 @@ def validator_Input(type,value):
     #   data_check = isinstance(value, str)
     # print(f"validator data is {data_check}")
 
-def addNewContract() :
+def addNewContact() :
     print("\n Vui long nhap cac thong tin sau")
     name = input("Nhap ten: ")
     phone = input("Nhap sdt: ")
@@ -80,15 +82,15 @@ def addNewContract() :
         "ten" : name,
         "phone": phone,
         "email": email,
-        "index": len(contract) + 1
+        "index": len(Contacts) + 1
     }
 
-    contract.append(tempContact)
+    Contacts.append(tempContact)
     print(f"Them thong tin lien he cua {name} thanh cong")
-    countContract(contract)
+    countContact(Contacts)
 
 def edit_contact() :
-    data_find = findContract()
+    data_find = findContact()
     if len(data_find) > 0 :
         for item in data_find:
             print(f"STT:{item.get('index')}. Ten:{item.get('ten')}, SDT:{item.get('phone')}")
@@ -97,12 +99,12 @@ def edit_contact() :
             index_edit = input("Dong dieu chinh khong duoc lon hon so dong tim duoc: ")
             continue
         print(f"Ban co muon dieu chinh lien he tai dong {index_edit} Khong?")
-        confirm_action = input("1.Co \n2.Khong \nBan chon: ")
+        confirm_action = input  ("1.Co \n2.Khong \nBan chon: ")
         if confirm_action =="2" :
             showMenu()
         else:
             try:
-                selected_contact = contract[int(index_edit)-1]
+                selected_contact = Contacts[int(index_edit)-1]
                 print("\nNhap thong tin moi (de trong neu khong muon sua):")
                 new_name = input(f"Ten moi ({selected_contact.get('ten')}): ")
 
@@ -121,14 +123,14 @@ def edit_contact() :
                     selected_contact['email'] = new_email
                 print("Cap nhat thong tin thanh cong ! Thong tin sau khi cap nhat la")
                 
-                showContactFind(contract)
+                showContactFind(Contacts)
             except  ValueError:
                 print("Vui long nhap so.")
     else :
         print("Khong the thuc hien tinh nang dieu chinh")
 
-def delete_contract() :
-    data_find = findContract()
+def delete_Contact() :
+    data_find = findContact()
     if len(data_find) <= 0 :
         print("Khong the thuc hien tinh nang xoa")
     else :
@@ -142,21 +144,58 @@ def delete_contract() :
             showMenu()
         else:
             try:
-                contract.pop( int(index_edit)-1)
+                Contacts.pop( int(index_edit)-1)
                 print("Xoa thong tin danh ba thanh cong! Danh ba con lai.")
-                showContactFind(contract)
+                showContactFind(Contacts)
             except  ValueError:
                 print("Vui long nhap so.")
+
+def export_Contact ():
+    data_find = findContact()
+    if len(data_find) <= 0 :
+        print("Khong the thuc hien tinh nang xuat danh ba lien lac")
+    else :
+        type_export = input("Chon loai dinh dang can xuat danh ba \n1.Excel \n2.Txt \n3.Csv \n4.Json \nBan chon dinh dang: ")
+        while int(type_export) > 4 :
+            type_export = print("Dinh dang khong duoc ho tro xin chon lai dinh dang duoc ho tro: ")
+            continue
+        
+        match type_export:
+            case "1": #la excel
+                file_Name = "danhba.xlsx"
+                df = pd.DataFrame(Contacts)
+                df.to_excel(file_Name, index=False)
+                print(f"Xuat thanh cong {file_Name}")
+            case "2": #la TXT               
+                file_Name = "danhba.txt"
+                with open(file_Name, "w", encoding="utf-8") as f:
+                    for c in Contacts:
+                        f.write(f"Tên: {c['ten']}, SĐT: {c['phone']}, Email: {c['email']}\n")
+                print(f"Xuat thanh cong {file_Name}")
+            case "3": #la CSV
+                file_Name = "danhba.csv"
+                keys = Contacts[0].keys()
+                with open(file_Name, "w", newline="", encoding="utf-8") as f:
+                    writer = csv.DictWriter(f, fieldnames=keys)
+                    writer.writeheader()
+                    writer.writerows(Contacts)
+                print(f"Xuat thanh cong {file_Name}")
+            case "4": #la json
+                file_Name = "danhba.json"
+                with open(file_Name, "w", encoding="utf-8") as f:
+                    json.dump(Contacts, f, ensure_ascii=False, indent=4)
+                print(f"Xuat thanh cong {file_Name}")
+
 def find_by_phone(phone) :
     temp = []
-    for i_contact in contract :
+    for i_contact in Contacts :
         if phone.lower() in i_contact.get('phone','').lower():
             temp.append(i_contact)
     return temp
 
 def find_by_name(ten) :
     temp = []
-    for i_contact in contract :
+    for i_contact in Contacts :
         if ten.lower() in i_contact.get('ten','').lower():
             temp.append(i_contact)
         else :
@@ -165,7 +204,7 @@ def find_by_name(ten) :
 
 def find_by_mail(mail) :
     temp = []
-    for i_contact in contract :
+    for i_contact in Contacts :
         if mail.lower() in i_contact.get('mail','').lower():
             temp.append(i_contact)
         else :
@@ -180,8 +219,8 @@ def filter_search() :
     return find_by_key,find_by_value
 
 
-def findContract():
-    if len(contract) <= 0 :
+def findContact():
+    if len(Contacts) <= 0 :
         print("Khong co thong tin nao trong danh sach. Vui long them moi")
         return []    
         
@@ -194,6 +233,8 @@ def findContract():
         tempFind = find_by_phone(find_by_value)
     elif find_by_key == "3":
         tempFind = find_by_mail(find_by_value)
+    elif find_by_key == "0" :
+        tempFind = Contacts
     if len(tempFind) < 0 :
         print(f'Khong tim duoc thong tin lien lac theo tu khoa {find_by_value}')
     else :
