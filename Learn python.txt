@@ -1,0 +1,11 @@
+Tạo project nhỏ để luyện:
+
+Lab 1: Viết chương trình quản lý danh bạ (thêm, sửa, xóa, lưu file). (done)
+
+Lab 2: Xây máy tính bỏ túi (cộng, trừ, nhân, chia).
+
+Lab 3: Viết mini game (ví dụ: đoán số, tic-tac-toe).
+
+Lab 4: Xử lý dữ liệu CSV (import/export).
+
+Lab 5: Làm web API đơn giản bằng Flask.
